@@ -4,11 +4,11 @@ const bcrypt = require("bcryptjs");
 
 const registerUser = async (req, res = response) => {
   try {
-    const { mail, password } = req.body;
+    const { email, password } = req.body;
 
-    let user = await User.findOne({ mail });
+    let user = await User.findOne({ email });
     if (user)
-      res.status(400).json({
+      return res.status(400).json({
         ok: false,
         msg: "Someone already is using this email",
       });
@@ -20,33 +20,56 @@ const registerUser = async (req, res = response) => {
 
     await user.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       ok: true,
       uid: user.id,
       name: user.name,
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({
+    return res.status(500).json({
       ok: false,
       msg: "Something went wrong :(",
     });
   }
 };
 
-const loginUser = (req, res = response) => {
-  const { email, password } = req.body;
+const loginUser = async (req, res = response) => {
+  try {
+    const { email, password } = req.body;
 
-  res.json({
-    ok: true,
-    msg: "login",
-    email,
-    password,
-  });
+    const user = await User.findOne({ email });
+
+    if (!user)
+      return res.status(401).json({
+        ok: false,
+        msg: "Email or password incorrect",
+      });
+
+    const validPassword = bcrypt.compareSync(password, user.password);
+
+    if (!validPassword)
+      return res.status(401).json({
+        ok: false,
+        msg: "Email or password incorrect",
+      });
+
+    return res.status(201).json({
+      ok: true,
+      uid: user.id,
+      name: user.name,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Something went wrong :(",
+    });
+  }
 };
 
 const renewToken = (req, res = response) => {
-  res.json({
+  return res.json({
     ok: true,
     msg: "renew",
   });
