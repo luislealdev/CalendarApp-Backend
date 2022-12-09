@@ -21,11 +21,11 @@ const registerUser = async (req, res = response) => {
 
     await user.save();
     //Generates jsonwebtoken
-    const token = await getJWT(user.uid, user.name);
+    const token = await getJWT(user._id, user.name);
 
     return res.status(201).json({
       ok: true,
-      uid: user.id,
+      uid: user._id,
       name: user.name,
       token,
     });
@@ -59,7 +59,7 @@ const loginUser = async (req, res = response) => {
       });
 
     //Generates jsonwebtoken
-    const token = await getJWT(user.uid, user.name);
+    const token = await getJWT(user.id, user.name);
 
     return res.status(201).json({
       ok: true,
@@ -77,8 +77,7 @@ const loginUser = async (req, res = response) => {
 };
 
 const renewToken = async (req, res = response) => {
-
-  const token = await getJWT(req.uid, req.name);
+  const token = await getJWT(req.id, req.name);
 
   return res.json({
     ok: true,
